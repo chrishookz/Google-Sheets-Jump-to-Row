@@ -1,0 +1,54 @@
+function onEdit(e) {
+  
+  //Get row, column, and sheet where an edit was made and set variables
+  var column = e.range.columnStart;
+  var row = e.range.rowStart;
+  var as = e.range.getSheet(); //Sheet where change was detected
+  
+  //Get the display name of the sheet where the change was detected
+  var activeSheet = as.getName();
+
+ 
+  /*
+    The next line of code reads: If the column edited equals 1 (column A) and the row edited equals 1 AND the display name of the sheet
+    equals "Materials Breakdown", run the code below.   You can include other sheets by adding && == "Budget Breakdown"
+
+    Example:  if (column == "1" && row == "1" && activeSheet == "Materials Breakdown" && activeSheet == "Budget Breakdown")
+
+   */
+
+  if (column == "1" && row == "1" && activeSheet == "Materials Breakdown" || activeSheet == "Labor Breakdown") {
+    
+    //Get spreadsheet where change was detected
+    var spreadsheet = SpreadsheetApp.getActive().getSheetByName(activeSheet);
+
+    //Get the search term/category selected from the drop down in A1
+    var category = spreadsheet.getRange("A1").getDisplayValue();
+   
+    //Provide the range of cells where the script should search for the category starting at row 2
+    var rangeToSearch = spreadsheet.getRange("B2:B");
+    
+    //Create text finder that searches for the "category" and ONLY matched the ENTIRE CELL. For example if the category selected is "Windows" and row contains "Single Hung Windows" this is NOT a match.  Cell must contain the word "Windows" ONLY
+
+    var textfinder = rangeToSearch.createTextFinder(category)
+                      .matchEntireCell(true)
+                      .findNext();
+    
+    //When a match is found get the row number and set variable
+    var foundRow = textfinder.getRow();
+
+    //Get the range (row and column number) on the spreadsheet.
+    var setCell = spreadsheet.getRange(foundRow,2);  //categories are in column 2 (Column B)
+    
+    //Go to bottom row
+    var bottomRow = spreadsheet.getMaxRows();
+    spreadsheet.setActiveRange(spreadsheet.getRange(bottomRow,1));
+    SpreadsheetApp.flush();
+
+    //set the active cell on the spreadsheet to range "setCell"
+    spreadsheet.setActiveRange(setCell);
+                      
+  }
+
+
+}
